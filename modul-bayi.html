@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Langkah Kecil — Modul Perawatan Bayi Baru Lahir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6F0;
+    --bg-alt:#F1E9DB;
+    --ink:#243139;
+    --ink-soft:#5C6B72;
+    --rose:#C4707A;
+    --rose-dark:#9E5058;
+    --sage:#748E70;
+    --sage-dark:#566E53;
+    --amber:#D9A441;
+    --amber-soft:#F6E9C9;
+    --card:#FFFFFF;
+    --border:#E5DBC8;
+    --danger:#B4453F;
+    --danger-bg:#F7E5E1;
+    --radius-s:6px;
+    --radius-m:12px;
+    --serif:'Fraunces', Georgia, serif;
+    --sans:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1A2126;
+      --bg-alt:#20282E;
+      --ink:#EFE9DD;
+      --ink-soft:#AAB6BB;
+      --card:#232C33;
+      --border:#333F47;
+      --amber-soft:#3A3320;
+      --danger-bg:#3A2422;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1A2126;
+    --bg-alt:#20282E;
+    --ink:#EFE9DD;
+    --ink-soft:#AAB6BB;
+    --card:#232C33;
+    --border:#333F47;
+    --amber-soft:#3A3320;
+    --danger-bg:#3A2422;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--rose-dark);}
+  ::selection{background:var(--amber-soft);}
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding:28px 24px 20px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky; top:0; z-index:20;
+  }
+  .top-inner{max-width:1180px; margin:0 auto; display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:baseline; gap:12px;}
+  .brand h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:28px;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .brand .tag{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-style:italic;
+    font-family:var(--serif);
+  }
+  .progress-wrap{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-soft);}
+  .progress-track{width:120px; height:6px; background:var(--bg-alt); border-radius:99px; overflow:hidden; border:1px solid var(--border);}
+  .progress-fill{height:100%; background:var(--sage); width:0%; transition:width .4s ease;}
+
+  /* ---------- Layout ---------- */
+  .layout{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:260px 1fr; gap:0; align-items:start;}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} }
+
+  /* ---------- Ruler sidebar ---------- */
+  nav.side{
+    position:sticky; top:97px;
+    padding:20px 0 40px 28px;
+    border-right:1px solid var(--border);
+    min-height:calc(100vh - 97px);
+    display:flex; flex-direction:column; gap:2px;
+  }
+  @media (max-width:860px){
+    nav.side{position:static; min-height:0; border-right:none; padding:14px 16px; flex-direction:row; overflow-x:auto; gap:8px; border-bottom:1px solid var(--border);}
+  }
+  .ruler-tick{
+    position:relative;
+    display:flex; align-items:center; gap:10px;
+    padding:9px 14px 9px 16px;
+    border-left:3px solid transparent;
+    cursor:pointer;
+    font-size:14px;
+    color:var(--ink-soft);
+    background:none; border-top:none; border-right:none; border-bottom:none;
+    text-align:left;
+    width:100%;
+    font-family:var(--sans);
+    border-radius:0 var(--radius-s) var(--radius-s) 0;
+  }
+  @media (max-width:860px){
+    .ruler-tick{width:auto; white-space:nowrap; border-left:none; border-bottom:3px solid transparent; border-radius:var(--radius-s) var(--radius-s) 0 0;}
+  }
+  .ruler-tick .mark{font-family:var(--serif); font-variant-numeric:tabular-nums; font-size:12px; color:var(--ink-soft); opacity:.6; width:24px; flex-shrink:0;}
+  .ruler-tick .dot{width:7px; height:7px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0; transition:.2s;}
+  .ruler-tick.done .dot{background:var(--sage); border-color:var(--sage);}
+  .ruler-tick:hover{background:var(--bg-alt); color:var(--ink);}
+  .ruler-tick.active{color:var(--ink); font-weight:600; border-left-color:var(--rose); background:var(--bg-alt);}
+  @media (max-width:860px){ .ruler-tick.active{border-left-color:transparent; border-bottom-color:var(--rose);} }
+
+  /* ---------- Main content ---------- */
+  main{padding:32px 32px 90px; min-width:0;}
+  @media (max-width:860px){ main{padding:24px 18px 70px;} }
+  .panel{display:none; max-width:680px;}
+  .panel.active{display:block; animation:rise .35s ease;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--serif); font-style:italic; color:var(--rose-dark); font-size:14px; margin:0 0 6px;}
+  h2.chapter-title{font-family:var(--serif); font-weight:600; font-size:32px; line-height:1.15; margin:0 0 14px; letter-spacing:-0.01em;}
+  .lede{font-size:16.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 28px;}
+  h3.section-h{font-family:var(--serif); font-weight:600; font-size:19px; margin:32px 0 12px;}
+  p{line-height:1.7; font-size:15.5px;}
+
+  ol.steps{padding:0; margin:0 0 20px; list-style:none; counter-reset:step;}
+  ol.steps li{
+    counter-increment:step;
+    position:relative;
+    padding:12px 16px 12px 46px;
+    margin-bottom:8px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-m);
+    line-height:1.6;
+    font-size:15px;
+  }
+  ol.steps li::before{
+    content:counter(step);
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-family:var(--serif); font-weight:600; color:var(--rose-dark);
+    font-size:15px;
+  }
+
+  ul.plain{padding-left:20px; margin:0 0 20px;}
+  ul.plain li{margin-bottom:7px; line-height:1.6; font-size:15px;}
+
+  .box{
+    border-radius:var(--radius-m);
+    padding:16px 18px;
+    margin:0 0 20px;
+    border:1px solid var(--border);
+    background:var(--card);
+  }
+  .box.tip{border-left:4px solid var(--sage); }
+  .box.tip .box-h{color:var(--sage-dark);}
+  .box.warn{border-left:4px solid var(--amber); background:var(--amber-soft);}
+  .box.warn .box-h{color:#8A6410;}
+  .box.danger{border-left:4px solid var(--danger); background:var(--danger-bg);}
+  .box.danger .box-h{color:var(--danger);}
+  .box-h{font-weight:700; font-size:13.5px; text-transform:none; margin-bottom:6px; display:flex; align-items:center; gap:7px;}
+  .box p, .box ul{margin:0;}
+  .box ul{padding-left:18px;}
+  .box ul li{margin-bottom:5px; font-size:14.5px; line-height:1.55;}
+
+  table.sched{width:100%; border-collapse:collapse; margin:0 0 20px; font-size:14px;}
+  table.sched th, table.sched td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--border);}
+  table.sched th{font-family:var(--serif); font-weight:600; color:var(--ink-soft); font-size:13px;}
+
+  .check-list{display:flex; flex-direction:column; gap:8px; margin:0 0 10px;}
+  .check-item{
+    display:flex; align-items:flex-start; gap:11px;
+    padding:12px 14px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-m);
+    cursor:pointer;
+    font-size:15px;
+    line-height:1.5;
+  }
+  .check-item input{margin-top:3px; width:16px; height:16px; accent-color:var(--sage); flex-shrink:0;}
+  .check-item.checked{opacity:.55; text-decoration:line-through;}
+
+  .reset-row{display:flex; justify-content:space-between; align-items:center; margin:18px 0 6px;}
+  .btn-ghost{
+    background:none; border:1px solid var(--border); color:var(--ink-soft);
+    padding:7px 14px; border-radius:99px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  }
+  .btn-ghost:hover{border-color:var(--rose); color:var(--rose-dark);}
+
+  .nav-buttons{display:flex; justify-content:space-between; margin-top:40px; padding-top:20px; border-top:1px solid var(--border);}
+  .nav-btn{
+    background:var(--card); border:1px solid var(--border); color:var(--ink);
+    padding:10px 16px; border-radius:var(--radius-s); cursor:pointer; font-size:14px; font-family:var(--sans);
+    display:flex; align-items:center; gap:8px;
+  }
+  .nav-btn:hover{border-color:var(--rose);}
+  .nav-btn:disabled{opacity:0; pointer-events:none;}
+
+  .disclaimer{font-size:12.5px; color:var(--ink-soft); margin-top:40px; padding-top:16px; border-top:1px dashed var(--border); line-height:1.6;}
+
+  .cover-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:24px 0;}
+  @media (max-width:520px){ .cover-grid{grid-template-columns:1fr;} }
+  .cover-card{border:1px solid var(--border); border-radius:var(--radius-m); padding:14px 16px; background:var(--card);}
+  .cover-card .k{font-family:var(--serif); font-weight:600; font-size:15px; margin-bottom:4px;}
+  .cover-card .v{font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+
+  :focus-visible{outline:2px solid var(--rose); outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Langkah Kecil</h1>
+      <span class="tag">modul pendamping orang tua baru</span>
+    </div>
+    <div class="progress-wrap">
+      <span id="progressLabel">0 / 10 bab dipelajari</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="side" id="sideNav"></nav>
+  <main id="mainContent"></main>
+</div>
+
+<script>
+const chapters = [
+  {
+    id:"beranda", mark:"0", title:"Selamat Datang, Orang Tua Baru",
+    eyebrow:"Cara memakai modul ini",
+    lede:"Minggu-minggu pertama bersama bayi terasa penuh dan melelahkan — itu wajar. Modul ini disusun agar bisa dibuka kapan saja, per topik, tanpa harus dibaca berurutan.",
+    body:`
+      <p>Setiap bab berisi langkah praktis, hal yang perlu diwaspadai, dan kesalahan umum yang sering terjadi. Tandai bab yang sudah dipelajari lewat penanda di samping — progres tersimpan otomatis di perangkat ini.</p>
+      <div class="cover-grid">
+        <div class="cover-card"><div class="k">Perawatan harian</div><div class="v">Tali pusar, mandi, popok, kulit bayi</div></div>
+        <div class="cover-card"><div class="k">Nutrisi & tidur</div><div class="v">Menyusui, jadwal tidur, cara menenangkan</div></div>
+        <div class="cover-card"><div class="k">Kesehatan</div><div class="v">Tanda bahaya dan jadwal imunisasi dasar</div></div>
+        <div class="cover-card"><div class="k">Checklist</div><div class="v">Daftar periksa harian yang bisa dicentang</div></div>
+      </div>
+      <div class="box tip">
+        <div class="box-h">Sebelum mulai</div>
+        <p>Modul ini bersifat edukatif dan bukan pengganti pemeriksaan tenaga kesehatan. Untuk kondisi bayi yang spesifik, selalu konsultasikan ke dokter, bidan, atau puskesmas terdekat.</p>
+      </div>
+    `
+  },
+  {
+    id:"tali-pusar", mark:"1", title:"Tali Pusar & Kulit Bayi",
+    eyebrow:"Perawatan harian",
+    lede:"Tali pusar biasanya lepas sendiri dalam 1–3 minggu. Tugas orang tua bukan mempercepatnya, melainkan menjaganya tetap bersih dan kering.",
+    body:`
+      <h3 class="section-h">Langkah perawatan</h3>
+      <ol class="steps">
+        <li>Cuci tangan sebelum menyentuh area tali pusar.</li>
+        <li>Bersihkan hanya dengan air bersih bila terkena kotoran, lalu keringkan dengan kain lembut — tidak perlu alkohol atau ramuan apa pun kecuali diarahkan tenaga kesehatan.</li>
+        <li>Lipat bagian atas popok ke bawah agar tidak menutupi atau menggesek tali pusar.</li>
+        <li>Biarkan area tersebut terpapar udara terbuka sesering mungkin, jangan dibungkus rapat atau diberi koin/gurita ketat.</li>
+        <li>Biarkan lepas dengan sendirinya — jangan ditarik meski sudah terlihat longgar.</li>
+      </ol>
+      <h3 class="section-h">Merawat kulit bayi</h3>
+      <ul class="plain">
+        <li>Kulit bayi baru lahir wajar mengelupas tipis di minggu pertama; cukup gunakan pelembap ringan tanpa pewangi bila kulit terasa kering.</li>
+        <li>Hindari sabun atau produk beraroma kuat pada minggu-minggu awal.</li>
+        <li>Ruam popok ringan biasa terjadi — jaga area tetap kering dan ganti popok lebih sering saat muncul kemerahan.</li>
+      </ul>
+      <div class="box danger">
+        <div class="box-h">Segera hubungi tenaga kesehatan bila</div>
+        <ul>
+          <li>Area tali pusar berbau tidak sedap, bernanah, atau kulit di sekitarnya memerah dan bengkak</li>
+          <li>Tali pusar berdarah cukup banyak dan tidak berhenti setelah ditekan lembut</li>
+          <li>Belum lepas juga setelah lebih dari 3 minggu</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:"mandi", mark:"2", title:"Memandikan Bayi",
+    eyebrow:"Perawatan harian",
+    lede:"Bayi baru lahir tidak perlu dimandikan tiap hari. Sebelum tali pusar lepas, cukup dilap dengan kain basah (spons mandi).",
+    body:`
+      <h3 class="section-h">Sebelum tali pusar lepas — mandi lap</h3>
+      <ol class="steps">
+        <li>Siapkan air hangat suam-suam kuku, handuk, dan pakaian ganti di dekat jangkauan sebelum mulai.</li>
+        <li>Bersihkan wajah dulu dengan kain lembab bersih, tanpa sabun, dari area mata ke arah luar.</li>
+        <li>Lap tubuh bagian demi bagian, tutup bagian yang belum dilap dengan handuk agar bayi tidak kedinginan.</li>
+        <li>Bersihkan lipatan leher, ketiak, dan selangkangan — area ini paling mudah lembap.</li>
+        <li>Keringkan segera dan menyeluruh, terutama di lipatan kulit.</li>
+      </ol>
+      <h3 class="section-h">Setelah tali pusar lepas — mandi rendam</h3>
+      <ol class="steps">
+        <li>Isi bak mandi bayi dengan air hangat setinggi 5–8 cm, uji suhu dengan punggung tangan atau siku.</li>
+        <li>Topang kepala dan leher bayi dengan satu tangan sepanjang waktu — bayi tidak pernah ditinggal sendirian di air, sekejap pun.</li>
+        <li>Basuh dari area paling bersih ke paling kotor: wajah, tubuh, lalu area popok terakhir.</li>
+        <li>Gunakan sabun bayi berbahan lembut secukupnya, 2–3 kali seminggu sudah cukup untuk kulit bayi.</li>
+        <li>Angkat, bungkus dengan handuk, dan keringkan segera agar suhu tubuh tetap stabil.</li>
+      </ol>
+      <div class="box warn">
+        <div class="box-h">Frekuensi</div>
+        <p>Mandi 2–3 kali seminggu sudah cukup untuk bayi baru lahir; mandi terlalu sering justru dapat mengeringkan kulitnya. Membersihkan area wajah dan popok bisa dilakukan tiap hari tanpa mandi penuh.</p>
+      </div>
+    `
+  },
+  {
+    id:"menyusui", mark:"3", title:"Menyusui & Pemberian Nutrisi",
+    eyebrow:"Nutrisi",
+    lede:"Baik menyusui langsung, ASI perah, maupun susu formula — yang terpenting adalah bayi cukup kenyang dan tumbuh sesuai jalurnya. Setiap keluarga punya jalan yang berbeda.",
+    body:`
+      <h3 class="section-h">Pola pemberian di minggu-minggu awal</h3>
+      <ul class="plain">
+        <li>Bayi baru lahir umumnya menyusu 8–12 kali dalam 24 jam, sekitar tiap 2–3 jam, termasuk malam hari.</li>
+        <li>Ikuti tanda lapar sedini mungkin: mengecap bibir, menoleh mencari puting, memasukkan tangan ke mulut — menangis adalah tanda lapar yang sudah terlambat.</li>
+        <li>Posisi menyusui yang nyaman: badan bayi menghadap penuh ke tubuh ibu, mulut membuka lebar, sebagian besar area areola masuk ke mulut bayi.</li>
+      </ul>
+      <h3 class="section-h">Tanda kecukupan ASI/susu</h3>
+      <ul class="plain">
+        <li>Popok basah minimal 6 kali sehari setelah hari ke-5</li>
+        <li>Berat badan naik sesuai pantauan tenaga kesehatan setelah penurunan awal yang wajar di minggu pertama</li>
+        <li>Bayi tampak tenang dan melepas payudara/botol sendiri setelah kenyang</li>
+      </ul>
+      <div class="box tip">
+        <div class="box-h">Untuk ibu menyusui</div>
+        <p>Nyeri ringan di awal wajar, tapi rasa sakit yang tajam atau puting lecet parah biasanya menandakan posisi pelekatan perlu diperbaiki — konsultan laktasi atau bidan dapat membantu mengoreksinya.</p>
+      </div>
+      <div class="box danger">
+        <div class="box-h">Segera konsultasi bila</div>
+        <ul>
+          <li>Bayi menolak menyusu/minum berulang kali atau tampak sangat lemas</li>
+          <li>Popok basah kurang dari 4 kali sehari setelah hari ke-5</li>
+          <li>Berat badan turun tajam atau tidak naik sama sekali di jadwal kontrol</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:"tidur", mark:"4", title:"Pola Tidur & Cara Menenangkan",
+    eyebrow:"Nutrisi & tidur",
+    lede:"Bayi baru lahir tidur 14–17 jam sehari, tapi dalam potongan pendek 2–4 jam — belum mengenal siang dan malam. Ini fase, bukan kegagalan orang tua.",
+    body:`
+      <h3 class="section-h">Tidur yang aman</h3>
+      <ul class="plain">
+        <li>Baringkan bayi telentang setiap kali tidur, di kasur yang rata dan cukup keras.</li>
+        <li>Kosongkan area tidur dari bantal, guling, selimut tebal, dan mainan lepas.</li>
+        <li>Idealnya bayi tidur di ranjang sendiri namun sekamar dengan orang tua, minimal untuk 6 bulan pertama.</li>
+        <li>Jaga suhu ruangan sejuk dan nyaman — bayi kepanasan sama berisikonya dengan kedinginan.</li>
+      </ul>
+      <h3 class="section-h">Langkah menenangkan bayi menangis</h3>
+      <ol class="steps">
+        <li>Cek kebutuhan dasar dulu: lapar, popok basah, kepanasan/kedinginan, atau ingin digendong.</li>
+        <li>Gendong dekat dada agar bayi mendengar detak jantung, sambil berayun perlahan.</li>
+        <li>Coba bedong (swaddle) longgar di area pinggul agar bayi merasa seperti di dalam kandungan.</li>
+        <li>Redupkan lampu dan kurangi suara/rangsangan berlebih, terutama menjelang malam.</li>
+        <li>Bila sudah dicoba semua dan bayi tetap menangis lama, letakkan di tempat aman lalu tarik napas sejenak — menangis bukan tanda kegagalan mengasuh.</li>
+      </ol>
+      <div class="box warn">
+        <div class="box-h">Untuk orang tua</div>
+        <p>Bila rasa lelah dan tertekan menumpuk, bergantian jaga dengan pasangan/keluarga dan istirahat saat bayi tidur sangat membantu. Ini bukan sesuatu yang harus dijalani sendirian.</p>
+      </div>
+    `
+  },
+  {
+    id:"popok", mark:"5", title:"Mengganti Popok",
+    eyebrow:"Perawatan harian",
+    lede:"Bayi baru lahir bisa buang air kecil 6–8 kali dan buang air besar beberapa kali sehari. Popok diganti segera setelah basah atau kotor.",
+    body:`
+      <h3 class="section-h">Langkah mengganti popok</h3>
+      <ol class="steps">
+        <li>Siapkan popok baru, kain/tisu basah bebas pewangi, dan tempat sampah dalam jangkauan sebelum membuka popok lama.</li>
+        <li>Bersihkan dari depan ke belakang, khususnya untuk bayi perempuan, guna mencegah iritasi.</li>
+        <li>Keringkan area kulit sebelum memasang popok baru — kulit lembap memicu ruam.</li>
+        <li>Pasang popok tidak terlalu ketat, sisakan ruang selebar dua jari di pinggang.</li>
+        <li>Cuci tangan setelahnya.</li>
+      </ol>
+      <div class="box tip">
+        <div class="box-h">Tentang warna & isi popok</div>
+        <p>Feses bayi ASI biasanya kuning kehijauan dan lembek/berbiji; bayi susu formula cenderung lebih padat dan berwarna cokelat muda. Warna hitam kehijauan (mekonium) normal di 2–3 hari pertama.</p>
+      </div>
+      <div class="box danger">
+        <div class="box-h">Perlu diwaspadai</div>
+        <ul>
+          <li>Feses berwarna putih pucat/seperti dempul, atau terdapat darah</li>
+          <li>Urin sangat sedikit atau berwarna oranye pekat setelah hari ke-5</li>
+          <li>Ruam popok memburuk, melepuh, atau tidak membaik setelah beberapa hari dijaga kering</li>
+        </ul>
+      </div>
+    `
+  },
+  {
+    id:"bahaya", mark:"6", title:"Tanda Bahaya — Kapan Harus ke Dokter",
+    eyebrow:"Kesehatan",
+    lede:"Sebagian besar hal kecil pada bayi baru lahir wajar. Namun ada tanda yang perlu direspons segera, bukan ditunggu.",
+    body:`
+      <div class="box danger">
+        <div class="box-h">Segera bawa ke IGD / layanan darurat bila muncul salah satu</div>
+        <ul>
+          <li>Demam pada bayi di bawah 3 bulan (suhu rektal ≥38°C) — pada usia ini demam selalu perlu dievaluasi segera</li>
+          <li>Napas sangat cepat, tersengal, cuping hidung kembang-kempis, atau tampak biru di bibir/wajah</li>
+          <li>Sangat lemas, sulit dibangunkan, atau tidak merespons seperti biasanya</li>
+          <li>Menolak menyusu/minum sama sekali, atau muntah menyembur berulang</li>
+          <li>Kejang</li>
+          <li>Kulit atau bagian putih mata tampak kuning semakin pekat, terutama menyebar ke tangan/kaki</li>
+          <li>Tidak buang air kecil dalam lebih dari 6–8 jam (tanda dehidrasi)</li>
+        </ul>
+      </div>
+      <h3 class="section-h">Hubungi bidan/dokter dalam 1–2 hari bila</h3>
+      <ul class="plain">
+        <li>Kuning ringan yang tidak kunjung membaik setelah 1–2 minggu</li>
+        <li>Berat badan tidak naik sesuai jadwal kontrol rutin</li>
+        <li>Muncul ruam yang meluas atau tampak tidak biasa</li>
+        <li>Orang tua merasa "ada yang tidak beres" meski sulit dijelaskan — insting orang tua layak didengar dan dicek</li>
+      </ul>
+      <div class="box tip">
+        <div class="box-h">Simpan nomor penting</div>
+        <p>Catat nomor bidan/dokter anak, puskesmas atau rumah sakit terdekat, dan kontak keluarga yang bisa dihubungi cepat — lihat bab "Kontak Darurat" di bagian akhir modul ini.</p>
+      </div>
+    `
+  },
+  {
+    id:"imunisasi", mark:"7", title:"Jadwal Imunisasi Dasar",
+    eyebrow:"Kesehatan",
+    lede:"Imunisasi dasar lengkap melindungi bayi dari penyakit yang berisiko berat di usia kecil. Jadwal berikut mengikuti pola umum program imunisasi dasar di Indonesia — konfirmasikan jadwal terbaru ke posyandu/puskesmas atau dokter anak.",
+    body:`
+      <table class="sched">
+        <tr><th>Usia</th><th>Imunisasi</th></tr>
+        <tr><td>0–24 jam</td><td>Hepatitis B (HB0)</td></tr>
+        <tr><td>1 bulan</td><td>BCG, Polio tetes (OPV 1)</td></tr>
+        <tr><td>2 bulan</td><td>DPT-HB-Hib 1, Polio 2, PCV 1</td></tr>
+        <tr><td>3 bulan</td><td>DPT-HB-Hib 2, Polio 3, PCV 2</td></tr>
+        <tr><td>4 bulan</td><td>DPT-HB-Hib 3, Polio 4, IPV</td></tr>
+        <tr><td>9 bulan</td><td>Campak/MR</td></tr>
+      </table>
+      <div class="box tip">
+        <div class="box-h">Yang perlu disiapkan saat imunisasi</div>
+        <ul>
+          <li>Bawa buku KIA/kartu imunisasi setiap kunjungan agar catatan lengkap dan tidak terlewat</li>
+          <li>Rewel ringan atau demam ringan 1–2 hari setelah imunisasi umumnya wajar</li>
+          <li>Tanyakan ke petugas kesehatan jadwal kontrol berikutnya sebelum pulang</li>
+        </ul>
+      </div>
+      <div class="box warn">
+        <div class="box-h">Catatan</div>
+        <p>Jadwal dapat berbeda sedikit antar fasilitas kesehatan dan dapat diperbarui oleh Kementerian Kesehatan dari waktu ke waktu. Gunakan tabel ini sebagai gambaran umum, bukan acuan pasti — jadwal resmi terbaru selalu didapat dari tenaga kesehatan.</p>
+      </div>
+    `
+  },
+  {
+    id:"checklist", mark:"8", title:"Checklist Harian",
+    eyebrow:"Alat bantu",
+    lede:"Centang hal-hal yang sudah dicek hari ini. Daftar ini tersimpan otomatis di perangkat ini dan bisa direset kapan saja.",
+    body:`<div id="checklistMount"></div>
+      <div class="reset-row">
+        <span style="font-size:13px;color:var(--ink-soft);" id="checklistCount"></span>
+        <button class="btn-ghost" id="resetChecklist" type="button">Reset checklist</button>
+      </div>
+    `
+  },
+  {
+    id:"kontak", mark:"9", title:"Kontak Darurat & Sumber Bantuan",
+    eyebrow:"Referensi",
+    lede:"Simpan atau catat kontak berikut di tempat yang mudah dijangkau — di kulkas, dompet, atau kontak favorit ponsel.",
+    body:`
+      <ul class="plain">
+        <li><strong>Bidan/dokter anak langganan</strong> — catat nomor dan jam praktik</li>
+        <li><strong>Puskesmas atau rumah sakit terdekat</strong> — simpan nomor IGD</li>
+        <li><strong>Layanan darurat nasional 119</strong> — untuk kondisi gawat darurat medis</li>
+        <li><strong>Posyandu setempat</strong> — untuk pemantauan tumbuh kembang dan imunisasi rutin</li>
+        <li><strong>Keluarga/tetangga terdekat</strong> — yang bisa dihubungi cepat bila butuh bantuan mendadak</li>
+      </ul>
+      <div class="box tip">
+        <div class="box-h">Dukungan untuk orang tua</div>
+        <p>Merawat bayi baru adalah kerja tim. Tidak apa-apa meminta bantuan, beristirahat saat ada kesempatan, dan mencari dukungan — baik dari keluarga, tenaga kesehatan, maupun kelompok sesama orang tua baru.</p>
+      </div>
+      <div class="disclaimer">
+        Modul "Langkah Kecil" disusun sebagai media edukasi umum dan bukan pengganti nasihat, diagnosis, atau perawatan medis profesional. Setiap bayi unik — untuk keputusan terkait kesehatan bayi Anda, selalu rujuk ke dokter, bidan, atau tenaga kesehatan resmi.
+      </div>
+    `
+  }
+];
+
+const checklistItems = [
+  "Cek popok dan ganti bila basah/kotor",
+  "Pantau frekuensi menyusui/minum bayi",
+  "Periksa dan bersihkan area tali pusar (bila belum lepas)",
+  "Pastikan posisi tidur bayi telentang dan area tidur bersih dari benda lepas",
+  "Amati suhu tubuh dan tanda tidak biasa (warna kulit, napas, aktivitas)",
+  "Luangkan waktu istirahat singkat untuk diri sendiri"
+];
+
+const sideNav = document.getElementById('sideNav');
+const mainContent = document.getElementById('mainContent');
+let progress = {};
+try{ progress = JSON.parse(localStorage.getItem('lk_progress') || '{}'); }catch(e){ progress = {}; }
+
+function saveProgress(){
+  try{ localStorage.setItem('lk_progress', JSON.stringify(progress)); }catch(e){}
+}
+
+function renderNav(activeId){
+  sideNav.innerHTML = chapters.map(c => `
+    <button class="ruler-tick ${c.id===activeId?'active':''} ${progress[c.id]?'done':''}" data-id="${c.id}" type="button">
+      <span class="mark">${c.mark}</span>
+      <span class="dot"></span>
+      <span>${c.title}</span>
+    </button>
+  `).join('');
+  sideNav.querySelectorAll('.ruler-tick').forEach(btn=>{
+    btn.addEventListener('click', ()=> showChapter(btn.dataset.id));
+  });
+  updateProgressBar();
+}
+
+function updateProgressBar(){
+  const total = chapters.length;
+  const done = Object.values(progress).filter(Boolean).length;
+  document.getElementById('progressLabel').textContent = `${done} / ${total} bab dipelajari`;
+  document.getElementById('progressFill').style.width = (done/total*100)+'%';
+}
+
+function renderChecklist(){
+  let checked = {};
+  try{ checked = JSON.parse(localStorage.getItem('lk_checklist') || '{}'); }catch(e){ checked = {}; }
+  const mount = document.getElementById('checklistMount');
+  if(!mount) return;
+  mount.innerHTML = `<div class="check-list">` + checklistItems.map((item,i)=>`
+    <label class="check-item ${checked[i]?'checked':''}" data-i="${i}">
+      <input type="checkbox" ${checked[i]?'checked':''}>
+      <span>${item}</span>
+    </label>
+  `).join('') + `</div>`;
+  const updateCount = ()=>{
+    const n = Object.values(checked).filter(Boolean).length;
+    const el = document.getElementById('checklistCount');
+    if(el) el.textContent = `${n} / ${checklistItems.length} selesai hari ini`;
+  };
+  mount.querySelectorAll('.check-item').forEach(label=>{
+    label.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const i = label.dataset.i;
+      checked[i] = !checked[i];
+      try{ localStorage.setItem('lk_checklist', JSON.stringify(checked)); }catch(err){}
+      label.classList.toggle('checked', !!checked[i]);
+      label.querySelector('input').checked = !!checked[i];
+      updateCount();
+    });
+  });
+  updateCount();
+  const resetBtn = document.getElementById('resetChecklist');
+  if(resetBtn){
+    resetBtn.onclick = ()=>{
+      checked = {};
+      try{ localStorage.setItem('lk_checklist', JSON.stringify(checked)); }catch(err){}
+      renderChecklist();
+    };
+  }
+}
+
+function showChapter(id){
+  const idx = chapters.findIndex(c=>c.id===id);
+  const c = chapters[idx];
+  progress[id] = true;
+  saveProgress();
+  mainContent.innerHTML = `
+    <div class="panel active">
+      <p class="eyebrow">${c.eyebrow}</p>
+      <h2 class="chapter-title">${c.title}</h2>
+      <p class="lede">${c.lede}</p>
+      ${c.body}
+      <div class="nav-buttons">
+        <button class="nav-btn" id="prevBtn" type="button" ${idx===0?'disabled':''}>&larr; Sebelumnya</button>
+        <button class="nav-btn" id="nextBtn" type="button" ${idx===chapters.length-1?'disabled':''}>Berikutnya &rarr;</button>
+      </div>
+    </div>
+  `;
+  if(id === 'checklist') renderChecklist();
+  renderNav(id);
+  window.scrollTo({top:0, behavior:'instant'});
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if(prevBtn) prevBtn.onclick = ()=> idx>0 && showChapter(chapters[idx-1].id);
+  if(nextBtn) nextBtn.onclick = ()=> idx<chapters.length-1 && showChapter(chapters[idx+1].id);
+}
+
+showChapter(chapters[0].id);
+</script>
+</body>
+</html>
